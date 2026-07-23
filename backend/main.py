@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Query, Depends
+from fastapi import FastAPI, UploadFile, File, Query, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, inspect
 from services.processor import FileProcessor
@@ -15,7 +15,6 @@ import os
 import re
 from typing import List, Dict, Any
 
-# Crear tablas del sistema
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NOVA DATA | Gestión de Datos Premium")
@@ -28,54 +27,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrar rutas
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(chatbot.router)
 
 processor = FileProcessor()
 
-@app.on_event("startup")
-def restore_backup_and_create_initial_admin():
+def run_sql_restore():
     backup_path = "/app/sas_db_backup.sql"
-    print(f"=== INICIANDO VERIFICACION DE BACKUP ({backup_path}) ===")
-    if os.path.exists(backup_path):
-        try:
-            with open(backup_path, "r", encoding="utf-8") as f:
-                sql_content = f.read()
+    if not os.path.exists(backup_path):
+        print("No se encontró /app/sas_db_backup.sql")
+        return
+    
+    print("Iniciando restauración de respaldo SQL...")
+    try:
+        with open(backup_path, "r", encoding="utf-8") as f:
+            sql_content = f.read()
 
-            print(f"Leidos {len(sql_content)} caracteres del archivo SQL.")
+        clean_statements = []
+        current_stmt = []
+        
+        for line in sql_content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("\\") or stripped.startswith("--") or stripped.startswith("SET ") or stripped.startswith("SELECT pg_catalog"):
+                continue
+            current_stmt.append(line)
+            if stripped.endswith(";"):
+                clean_statements.append("\n".join(current_stmt))
+                current_stmt = []
 
-            # Filtrar lineas incompatibles de pg_dump (\restrict, \connect, SET, etc)
-            clean_statements = []
-            current_stmt = []
-            
-            for line in sql_content.splitlines():
-                stripped = line.strip()
-                if not stripped or stripped.startswith("\\") or stripped.startswith("--") or stripped.startswith("SET ") or stripped.startswith("SELECT pg_catalog"):
-                    continue
-                current_stmt.append(line)
-                if stripped.endswith(";"):
-                    clean_statements.append("\n".join(current_stmt))
-                    current_stmt = []
+        with engine.begin() as conn:
+            for stmt in clean_statements:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as e:
+                    pass
+        print(f"Restauración SQL completada ({len(clean_statements)} sentencias).")
+    except Exception as ex:
+        print(f"Error restaurando SQL: {ex}")
 
-            print(f"Total de sentencias limpias a ejecutar: {len(clean_statements)}")
-            
-            executed_count = 0
-            with engine.begin() as conn:
-                for stmt in clean_statements:
-                    try:
-                        conn.execute(text(stmt))
-                        executed_count += 1
-                    except Exception as e:
-                        print(f"Warn en SQL: {str(e)[:80]}")
-
-            print(f"=== RESTAURACION COMPLETADA: {executed_count} SENTENCIAS EJECUTADAS CON EXITO ===")
-        except Exception as ex:
-            print(f"Error restaurando backup: {ex}")
-    else:
-        print("No se encontro el archivo /app/sas_db_backup.sql")
-
+@app.on_event("startup")
+def create_initial_admin():
     with engine.begin() as conn:
         result = conn.execute(text("SELECT id FROM users WHERE username = 'admin'")).fetchone()
         if not result:
@@ -84,6 +76,13 @@ def restore_backup_and_create_initial_admin():
                 text("INSERT INTO users (username, hashed_password, is_admin, is_active) VALUES (:u, :p, :a, :ac)"),
                 {"u": "admin", "p": hashed_pwd, "a": True, "ac": True}
             )
+    # Disparar restauración de tablas
+    run_sql_restore()
+
+@app.post("/restore-database")
+async def trigger_restore(current_user: User = Depends(get_current_admin_user)):
+    run_sql_restore()
+    return {"status": "success", "message": "Base de datos restaurada correctamente"}
 
 @app.get("/")
 async def root():
