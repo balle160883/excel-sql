@@ -38,33 +38,36 @@ processor = FileProcessor()
 def restore_backup_and_create_initial_admin():
     backup_path = "/app/sas_db_backup.sql"
     if os.path.exists(backup_path):
-        with engine.begin() as conn:
-            res = conn.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('users', 'user_permissions', 'audit_logs')")).scalar()
-            if res == 0:
-                print("Restaurando base de datos desde sas_db_backup.sql...")
-                try:
-                    with open(backup_path, "r", encoding="utf-8") as f:
-                        lines = f.readlines()
-                    
-                    clean_sql = []
-                    for line in lines:
-                        if line.startswith("\\"):
-                            continue
-                        clean_sql.append(line)
-                    
-                    full_script = "".join(clean_sql)
-                    statements = full_script.split(";\n")
-                    
-                    for stmt in statements:
-                        s = stmt.strip()
-                        if s:
-                            try:
-                                conn.execute(text(s))
-                            except Exception:
-                                pass
-                    print("Restauracion de tablas completada.")
-                except Exception as ex:
-                    print(f"Error restaurando backup: {ex}")
+        try:
+            with open(backup_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            
+            # Extraer todas las sentencias CREATE TABLE
+            create_tables = [s.strip() for s in content.split("CREATE TABLE ") if s.strip()]
+            
+            with engine.begin() as conn:
+                for ct in create_tables[1:]:
+                    stmt_body = ct.split(";\n")[0]
+                    full_stmt = "CREATE TABLE " + stmt_body
+                    try:
+                        conn.execute(text(full_stmt))
+                    except Exception as e:
+                        pass
+
+            # Extraer sentencias INSERT INTO
+            inserts = [s.strip() for s in content.split("INSERT INTO ") if s.strip()]
+            with engine.begin() as conn:
+                for ins in inserts[1:]:
+                    stmt_body = ins.split(";\n")[0]
+                    full_stmt = "INSERT INTO " + stmt_body
+                    try:
+                        conn.execute(text(full_stmt))
+                    except Exception as e:
+                        pass
+
+            print("Restauracion directa de tablas completada.")
+        except Exception as ex:
+            print(f"Error restaurando backup: {ex}")
 
     with engine.begin() as conn:
         result = conn.execute(text("SELECT id FROM users WHERE username = 'admin'")).fetchone()
