@@ -27,7 +27,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-Seguridad2028Password}@postgres-compress-back-end-panel-h65qh3:5432/${POSTGRES_DB:-sas_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-Seguridad2028Password}@31.97.144.6:5433/${POSTGRES_DB:-sas_db}
     networks:
       - sas_network
 
