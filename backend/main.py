@@ -36,34 +36,38 @@ processor = FileProcessor()
 def run_sql_restore():
     backup_path = "/app/sas_db_backup.sql"
     if not os.path.exists(backup_path):
+        print("Backup file not found at", backup_path)
         return
     
+    print("Iniciando restauración de respaldo SQL...")
     try:
         with open(backup_path, "r", encoding="utf-8") as f:
             sql_content = f.read()
 
-        clean_statements = []
-        current_stmt = []
-        
-        for line in sql_content.splitlines():
-            stripped = line.strip()
-            if not stripped or stripped.startswith("\\") or stripped.startswith("--") or stripped.startswith("SET ") or stripped.startswith("SELECT pg_catalog"):
-                continue
-            current_stmt.append(line)
-            if stripped.endswith(";"):
-                clean_statements.append("\n".join(current_stmt))
-                current_stmt = []
+        # Dividir por punto y coma (;) respetando bloques multilínea
+        raw_statements = sql_content.split(";")
+        print(f"Total de bloques leídos del archivo: {len(raw_statements)}")
 
-        print(f"Total sentencias a ejecutar: {len(clean_statements)}")
+        executed_ok = 0
         with engine.begin() as conn:
-            success_count = 0
-            for stmt in clean_statements:
+            for raw_stmt in raw_statements:
+                stmt = raw_stmt.strip()
+                if not stmt:
+                    continue
+                # Saltar comentarios o líneas del sistema psql
+                lines = [l for l in stmt.splitlines() if not l.strip().startswith("--") and not l.strip().startswith("\\")]
+                clean_stmt = "\n".join(lines).strip()
+                if not clean_stmt:
+                    continue
+                
                 try:
-                    conn.execute(text(stmt))
-                    success_count += 1
+                    conn.execute(text(clean_stmt))
+                    executed_ok += 1
                 except Exception as e:
-                    print(f"Error ejecutando SQL ({stmt[:40]}...): {e}")
-            print(f"Ejecutadas con éxito {success_count} / {len(clean_statements)} sentencias.")
+                    # Imprimir causa exacta en logs para diagnóstico
+                    print(f"SQL Warn ({clean_stmt[:35]}...): {e}")
+                    
+        print(f"Restauración SQL finalizada. Sentencias ejecutadas con éxito: {executed_ok}")
     except Exception as ex:
         print(f"Error general en restore: {ex}")
 
