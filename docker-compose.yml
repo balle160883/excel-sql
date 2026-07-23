@@ -13,6 +13,7 @@ services:
       - "5433:5432"
     volumes:
       - sas_postgres_data:/var/lib/postgresql/data
+      - ./sas_db_backup.sql:/docker-entrypoint-initdb.d/sas_db_backup.sql
     networks:
       - sas_network
 
