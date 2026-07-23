@@ -36,10 +36,8 @@ processor = FileProcessor()
 def run_sql_restore():
     backup_path = "/app/sas_db_backup.sql"
     if not os.path.exists(backup_path):
-        print("No se encontró /app/sas_db_backup.sql")
         return
     
-    print("Iniciando restauración de respaldo SQL...")
     try:
         with open(backup_path, "r", encoding="utf-8") as f:
             sql_content = f.read()
@@ -60,11 +58,10 @@ def run_sql_restore():
             for stmt in clean_statements:
                 try:
                     conn.execute(text(stmt))
-                except Exception as e:
+                except Exception:
                     pass
-        print(f"Restauración SQL completada ({len(clean_statements)} sentencias).")
-    except Exception as ex:
-        print(f"Error restaurando SQL: {ex}")
+    except Exception:
+        pass
 
 @app.on_event("startup")
 def create_initial_admin():
@@ -76,13 +73,11 @@ def create_initial_admin():
                 text("INSERT INTO users (username, hashed_password, is_admin, is_active) VALUES (:u, :p, :a, :ac)"),
                 {"u": "admin", "p": hashed_pwd, "a": True, "ac": True}
             )
-    # Disparar restauración de tablas
-    run_sql_restore()
 
 @app.post("/restore-database")
-async def trigger_restore(current_user: User = Depends(get_current_admin_user)):
-    run_sql_restore()
-    return {"status": "success", "message": "Base de datos restaurada correctamente"}
+async def trigger_restore(background_tasks: BackgroundTasks, current_user: User = Depends(get_current_admin_user)):
+    background_tasks.add_task(run_sql_restore)
+    return {"status": "success", "message": "Restauración iniciada en segundo plano"}
 
 @app.get("/")
 async def root():
