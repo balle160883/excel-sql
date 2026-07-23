@@ -44,27 +44,27 @@ def run_sql_restore():
         with open(backup_path, "r", encoding="utf-8") as f:
             sql_content = f.read()
 
-        # Ejecutar el contenido en transacciones optimizadas por bloque
-        with engine.begin() as conn:
-            # Dividir en bloques limpios de sentencias válidas
-            clean_statements = []
-            current_stmt = []
-            for line in sql_content.splitlines():
-                stripped = line.strip()
-                if not stripped or stripped.startswith("--") or stripped.startswith("\\"):
-                    continue
-                current_stmt.append(line)
-                if stripped.endswith(";"):
-                    clean_statements.append("\n".join(current_stmt))
-                    current_stmt = []
-            
-            print(f"Total sentencias procesadas: {len(clean_statements)}")
+        # Dividir en bloques limpios de sentencias válidas
+        clean_statements = []
+        current_stmt = []
+        for line in sql_content.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("--") or stripped.startswith("\\"):
+                continue
+            current_stmt.append(line)
+            if stripped.endswith(";"):
+                clean_statements.append("\n".join(current_stmt))
+                current_stmt = []
+
+        print(f"Total sentencias a procesar: {len(clean_statements)}")
+        # Usar conexion directa autocommit para no mantener bloqueos
+        with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
             for stmt in clean_statements:
                 try:
                     conn.execute(text(stmt))
                 except Exception as e:
                     pass
-        print("Restauración SQL rápida completada exitosamente.")
+        print("Restauración SQL autocommit completada.")
     except Exception as ex:
         print(f"Error general en restore: {ex}")
 
