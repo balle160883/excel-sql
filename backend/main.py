@@ -34,8 +34,28 @@ app.include_router(chatbot.router)
 processor = FileProcessor()
 
 @app.on_event("startup")
-def create_initial_admin():
+def restore_backup_and_create_initial_admin():
+    import os
     with engine.begin() as conn:
+        # Check if business tables exist (other than system tables)
+        res = conn.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('users', 'user_permissions', 'audit_logs')")).scalar()
+        backup_path = "/app/sas_db_backup.sql"
+        if res == 0 and os.path.exists(backup_path):
+            print("Restoring initial database backup from sas_db_backup.sql...")
+            try:
+                with open(backup_path, "r", encoding="utf-8") as f:
+                    sql_script = f.read()
+                # Split and execute sql statements
+                statements = [stmt.strip() for stmt in sql_script.split(";") if stmt.strip() and not stmt.strip().startswith("\\")]
+                for stmt in statements:
+                    try:
+                        conn.execute(text(stmt))
+                    except Exception as e:
+                        pass
+                print("Database backup restored successfully!")
+            except Exception as ex:
+                print(f"Error restoring backup: {ex}")
+
         # Verificar si existe usuario admin
         result = conn.execute(text("SELECT id FROM users WHERE username = 'admin'")).fetchone()
         if not result:

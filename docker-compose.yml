@@ -22,6 +22,7 @@ services:
     restart: always
     volumes:
       - ./backend:/app
+      - ./sas_db_backup.sql:/app/sas_db_backup.sql
     ports:
       - "8001:8000"
     environment:
