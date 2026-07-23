@@ -11,9 +11,10 @@ from core.security import get_password_hash
 from services.audit_service import log_action
 from sqlalchemy.orm import Session
 import uvicorn
+import os
 from typing import List, Dict, Any
 
-# Crear tablas
+# Crear tablas del sistema
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NOVA DATA | Gestión de Datos Premium")
@@ -35,37 +36,44 @@ processor = FileProcessor()
 
 @app.on_event("startup")
 def restore_backup_and_create_initial_admin():
-    import os
-    with engine.begin() as conn:
-        # Check if business tables exist (other than system tables)
-        res = conn.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('users', 'user_permissions', 'audit_logs')")).scalar()
-        backup_path = "/app/sas_db_backup.sql"
-        if res == 0 and os.path.exists(backup_path):
-            print("Restoring initial database backup from sas_db_backup.sql...")
-            try:
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    sql_script = f.read()
-                # Split and execute sql statements
-                statements = [stmt.strip() for stmt in sql_script.split(";") if stmt.strip() and not stmt.strip().startswith("\\")]
-                for stmt in statements:
-                    try:
-                        conn.execute(text(stmt))
-                    except Exception as e:
-                        pass
-                print("Database backup restored successfully!")
-            except Exception as ex:
-                print(f"Error restoring backup: {ex}")
+    backup_path = "/app/sas_db_backup.sql"
+    if os.path.exists(backup_path):
+        with engine.begin() as conn:
+            res = conn.execute(text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('users', 'user_permissions', 'audit_logs')")).scalar()
+            if res == 0:
+                print("Restaurando base de datos desde sas_db_backup.sql...")
+                try:
+                    with open(backup_path, "r", encoding="utf-8") as f:
+                        lines = f.readlines()
+                    
+                    clean_sql = []
+                    for line in lines:
+                        if line.startswith("\\"):
+                            continue
+                        clean_sql.append(line)
+                    
+                    full_script = "".join(clean_sql)
+                    statements = full_script.split(";\n")
+                    
+                    for stmt in statements:
+                        s = stmt.strip()
+                        if s:
+                            try:
+                                conn.execute(text(s))
+                            except Exception:
+                                pass
+                    print("Restauracion de tablas completada.")
+                except Exception as ex:
+                    print(f"Error restaurando backup: {ex}")
 
-        # Verificar si existe usuario admin
+    with engine.begin() as conn:
         result = conn.execute(text("SELECT id FROM users WHERE username = 'admin'")).fetchone()
         if not result:
-            print("Creating initial admin user...")
             hashed_pwd = get_password_hash("admin123")
             conn.execute(
                 text("INSERT INTO users (username, hashed_password, is_admin, is_active) VALUES (:u, :p, :a, :ac)"),
                 {"u": "admin", "p": hashed_pwd, "a": True, "ac": True}
             )
-            print("Admin user created: admin / admin123")
 
 @app.get("/")
 async def root():
@@ -74,10 +82,8 @@ async def root():
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...), 
-    current_user: User = Depends(get_current_active_user) # Solo usuarios logueados
+    current_user: User = Depends(get_current_active_user)
 ):
-    # Solo admins o usuarios permitidos deberían subir archivos? 
-    # Por ahora dejémoslo para cualquier usuario autenticado, o restrinjamos a admin si se prefiere.
     content = await file.read()
     filename = file.filename
     
@@ -98,7 +104,6 @@ async def upload_file(
                 "tables": imported_tables
             }
         else:
-            # Flujo CSV (una sola tabla)
             df = processor.process_csv(content, filename)
             table_name = processor.create_dynamic_table(df, filename, engine)
             return {
@@ -114,7 +119,6 @@ async def upload_file(
 @app.get("/tables")
 async def list_tables(current_user: User = Depends(get_current_active_user)):
     with engine.connect() as conn:
-        # Filtrar tablas del sistema de postgres y las de autenticación
         query = text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('users', 'user_permissions')")
         result = conn.execute(query)
         tables = [row[0] for row in result]
@@ -155,16 +159,14 @@ async def get_table_data(
 ):
     try:
         with engine.connect() as conn:
-            query = text(f"SELECT * FROM {table_name} LIMIT :limit OFFSET :offset")
+            query = text(f'SELECT * FROM "{table_name}" LIMIT :limit OFFSET :offset')
             result = conn.execute(query, {"limit": limit, "offset": offset})
             
             rows = [dict(row._mapping) for row in result]
             
-            # Obtener conteo total
-            count_query = text(f"SELECT COUNT(*) FROM {table_name}")
+            count_query = text(f'SELECT COUNT(*) FROM "{table_name}"')
             total_count = conn.execute(count_query).scalar()
             
-            # Obtener nombre de la PK para el frontend
             pk_query = text("""
                 SELECT kcu.column_name
                 FROM information_schema.table_constraints tco
@@ -185,7 +187,6 @@ async def get_table_data(
                 """), {"table_name": table_name}).fetchone()
                 pk_column = fallback[0] if fallback else "id"
 
-            # Verificar si la PK tiene un valor por defecto (ej. secuencia autoincrementable)
             pk_has_default = False
             default_check_query = text("""
                 SELECT column_default 
@@ -198,7 +199,6 @@ async def get_table_data(
             if default_res and default_res[0] is not None:
                 pk_has_default = True
 
-            # Verificar si tiene permiso de edición para enviar flag al frontend
             can_edit = False
             if current_user.is_admin:
                 can_edit = True
@@ -215,7 +215,7 @@ async def get_table_data(
                 "offset": offset,
                 "primary_key": pk_column,
                 "pk_has_default": pk_has_default,
-                "can_edit": can_edit # Flag para el frontend
+                "can_edit": can_edit
             }
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -225,20 +225,14 @@ async def update_row(
     table_name: str, 
     pk_value: str, 
     updates: Dict[str, Any],
-    # INYECCIÓN IMPORTANTE: Validar permiso dinámico
-    # Usamos Depends(PermissionChecker(table_name)) no funciona directo porque table_name es path param.
-    # Tenemos que hacerlo dentro o usar un wrapper. FastAPI permite usar dependencias que toman request.
-    # Para simplificar, lo llamamos manualmente en el body.
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db) 
 ):
-    # Verificación de permisos manual
     checker = PermissionChecker(table_name)
-    checker(current_user, db) # Lanza excepción si falla
+    checker(current_user, db)
 
     try:
-        with engine.begin() as conn: # Usar transacción
-            # 1. Detectar PK
+        with engine.begin() as conn:
             pk_query = text("""
                 SELECT kcu.column_name
                 FROM information_schema.table_constraints tco
@@ -251,7 +245,6 @@ async def update_row(
             pk_result = conn.execute(pk_query, {"table_name": table_name}).fetchone()
             
             if not pk_result:
-                # No hay PK formal, buscar la primera columna como fallback
                 fallback = conn.execute(text("""
                     SELECT column_name FROM information_schema.columns
                     WHERE table_name = :table_name AND table_schema = 'public'
@@ -264,12 +257,10 @@ async def update_row(
             else:
                 pk_column = pk_result[0]
 
-            # 1.5 Obtener información de columnas para limpiar valores
             inspector = inspect(engine)
             columns_info = inspector.get_columns(table_name)
             col_types = {col['name']: str(col['type']).upper() for col in columns_info}
 
-            # 2. Construir Query de Update
             set_clauses = []
             params = {"pk_value": pk_value}
             idx = 0
@@ -278,7 +269,6 @@ async def update_row(
                 if key == pk_column or key not in col_types:
                     continue
                 
-                # Limpiar valores vacíos para campos que no son de texto
                 if value is None or value == "":
                     col_type = col_types[key]
                     is_text = any(t in col_type for t in ('CHAR', 'TEXT', 'VARCHAR'))
@@ -296,14 +286,11 @@ async def update_row(
                 return {"status": "warning", "message": "No hay campos para actualizar"}
 
             sql = f'UPDATE "{table_name}" SET {", ".join(set_clauses)} WHERE "{pk_column}" = :pk_value'
-            
-            # 3. Ejecutar
             result = conn.execute(text(sql), params)
             
             if result.rowcount == 0:
                 return {"status": "error", "message": "Registro no encontrado"}
                 
-            # REGISTRO DE AUDITORÍA
             log_action(
                 db=db,
                 user_id=current_user.id,
@@ -325,13 +312,11 @@ async def delete_row(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    # Verificación de permisos manual (usando el mismo checker de update por ahora)
     checker = PermissionChecker(table_name)
     checker(current_user, db)
 
     try:
         with engine.begin() as conn:
-            # 1. Detectar PK
             pk_query = text("""
                 SELECT kcu.column_name
                 FROM information_schema.table_constraints tco
@@ -345,7 +330,6 @@ async def delete_row(
             if pk_result:
                 pk_column = pk_result[0]
             else:
-                # No hay PK formal, buscar la primera columna de la tabla como fallback
                 fallback = conn.execute(text("""
                     SELECT column_name FROM information_schema.columns
                     WHERE table_name = :table_name AND table_schema = 'public'
@@ -353,14 +337,12 @@ async def delete_row(
                 """), {"table_name": table_name}).fetchone()
                 pk_column = fallback[0] if fallback else "id"
 
-            # 2. Ejecutar Delete
-            sql = f"DELETE FROM {table_name} WHERE {pk_column} = :pk_value"
+            sql = f'DELETE FROM "{table_name}" WHERE "{pk_column}" = :pk_value'
             result = conn.execute(text(sql), {"pk_value": pk_value})
 
             if result.rowcount == 0:
                 return {"status": "error", "message": "Registro no encontrado"}
 
-            # REGISTRO DE AUDITORÍA
             log_action(
                 db=db,
                 user_id=current_user.id,
@@ -381,13 +363,11 @@ async def create_row(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    # Verificación de permisos manual
     checker = PermissionChecker(table_name)
     checker(current_user, db)
 
     try:
         with engine.begin() as conn:
-            # 1. Obtener información de columnas
             inspector = inspect(engine)
             columns_info = inspector.get_columns(table_name)
             
@@ -400,7 +380,6 @@ async def create_row(
                 col_nullables[name] = col.get('nullable', True)
                 col_has_default[name] = col.get('default') is not None
 
-            # 1.5 Preparar campos y valores
             columns = []
             placeholders = []
             params = {}
@@ -408,18 +387,15 @@ async def create_row(
             
             for key, value in data.items():
                 if key not in col_types:
-                    continue  # Saltar campos que no existen en la tabla
+                    continue
                 
-                # Si el valor está vacío (None o "")
                 if value is None or value == "":
                     col_type = col_types[key]
                     is_text = any(t in col_type for t in ('CHAR', 'TEXT', 'VARCHAR'))
                     
                     if is_text and value == "":
-                        # Si es texto y el valor es "", lo mantenemos
                         pass
                     else:
-                        # Si tiene un default o es autoincremental/PK no nulo, lo omitimos para que actúe el DEFAULT
                         if col_has_default[key] or not col_nullables[key]:
                             continue
                         else:
@@ -434,15 +410,9 @@ async def create_row(
             if not columns:
                 return {"status": "error", "message": "No hay datos para insertar"}
 
-            # 2. Construir SQL
             sql = f'INSERT INTO "{table_name}" ({", ".join(columns)}) VALUES ({", ".join(placeholders)})'
-            
-            # Nota: Para obtener el ID insertado en Postgres de forma genérica 
-            # podríamos intentar RETURNING id, pero la tabla puede no tener PK 'id'.
-            # Por ahora lo ejecutamos y logueamos.
             conn.execute(text(sql), params)
 
-            # REGISTRO DE AUDITORÍA
             log_action(
                 db=db,
                 user_id=current_user.id,
@@ -464,8 +434,6 @@ async def get_audit_logs(
     db: Session = Depends(get_db)
 ):
     logs = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).offset(skip).limit(limit).all()
-    
-    # Enriquecer con nombre de usuario (podríamos usar join en el query pero así es simple)
     result = []
     for log in logs:
         user = db.query(User).filter(User.id == log.user_id).first()
