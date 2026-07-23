@@ -93,12 +93,12 @@ async def upload_file(
             }
     
     return {"status": "error", "message": "Solo se soportan archivos Excel y CSV para importación SQL"}
-
 @app.get("/tables")
 async def list_tables(current_user: User = Depends(get_current_active_user)):
     with engine.connect() as conn:
-        query = text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN ('users', 'user_permissions')")
-        result = conn.execute(query)
+        hidden_tables = ('users', 'user_permissions', 'audit_logs', 'vista_sucursales', 'descripciones_tablas', '01_matriz_de_conocimiento', '01.-matriz_de_conocimiento', 'catalago_soporte')
+        query = text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name NOT IN :hidden")
+        result = conn.execute(query, {"hidden": hidden_tables})
         tables = [row[0] for row in result]
         return {"tables": tables}
 
