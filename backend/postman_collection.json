@@ -1,0 +1,361 @@
+{
+    "info": {
+        "_postman_id": "nova-data-collection",
+        "name": "Nova Data API",
+        "description": "Colección de endpoints para la API de Nova Data (Excel a SQL).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Login (Get Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "pm.environment.set(\"token\", jsonData.access_token);",
+                                    "console.log(\"Token set to:\", jsonData.access_token);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "username",
+                                    "value": "admin",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "admin123",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "token"
+                            ]
+                        },
+                        "description": "Obtiene el token de acceso. El script actualiza automáticamente la variable {{token}}."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Tables",
+            "item": [
+                {
+                    "name": "List Tables",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/tables",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tables"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Table Schema",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/tables/:table_name/schema",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tables",
+                                ":table_name",
+                                "schema"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "table_name",
+                                    "value": "nombre_de_tabla_ejemplo"
+                                }
+                            ]
+                        },
+                        "description": "Obtiene los metadatos (columnas y tipos) de una tabla."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Upload File",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/upload",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "upload"
+                            ]
+                        },
+                        "description": "Sube un archivo .xlsx o .csv"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Table Data",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/tables/:table_name?limit=100&offset=0",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tables",
+                                ":table_name"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "100"
+                                },
+                                {
+                                    "key": "offset",
+                                    "value": "0"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "table_name",
+                                    "value": "nombre_de_tabla_ejemplo"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Row",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"columna_a_editar\": \"nuevo_valor\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tables/:table_name/:pk_value",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tables",
+                                ":table_name",
+                                ":pk_value"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "table_name",
+                                    "value": "nombre_de_tabla_ejemplo"
+                                },
+                                {
+                                    "key": "pk_value",
+                                    "value": "valor_id"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Users (Admin)",
+            "item": [
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/?skip=0&limit=100",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                ""
+                            ],
+                            "query": [
+                                {
+                                    "key": "skip",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "100"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"password\": \"secreto\",\n  \"is_admin\": false,\n  \"is_active\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                ""
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Permissions",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"permissions\": [\n    {\n      \"table_name\": \"nombre_tabla\",\n      \"can_edit\": true\n    }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/:user_id/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":user_id",
+                                "permissions"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "user_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000"
+        },
+        {
+            "key": "token",
+            "value": ""
+        }
+    ]
+}

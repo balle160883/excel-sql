@@ -1,0 +1,601 @@
+{
+    "info": {
+        "_postman_id": "chatbot-categorized-collection",
+        "name": "Nova Data - Chatbot por Categorías",
+        "description": "Colección organizada por áreas funcionales para el chatbot con los nombres REALES de las tablas del Excel.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "— UTILIDADES —",
+            "item": [
+                {
+                    "name": "Buscar en Utilidades",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"descripciones_tablas\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— PRODUCTOS DE AHORRO —",
+            "item": [
+                {
+                    "name": "Buscar en Ahorro",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_ahorro\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— INVERSIONES —",
+            "item": [
+                {
+                    "name": "Buscar en Catálogo Inversiones",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"catalogo_inversiones\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar en Tasas Inversiones",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tasas_inversiones\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar en Tablas de Compatibilidad Inversiones",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tablas_inversiones\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— CRÉDITOS —",
+            "item": [
+                {
+                    "name": "Buscar en Créditos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tablas_credito\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— SERVICIOS —",
+            "item": [
+                {
+                    "name": "Buscar en Servicios",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_servicios\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— SOPORTE —",
+            "item": [
+                {
+                    "name": "Buscar en Soporte",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"catalgo_soporte\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— PROMOCIONES —",
+            "item": [
+                {
+                    "name": "Buscar en Promociones",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_promociones\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— SUCURSALES Y ATM —",
+            "item": [
+                {
+                    "name": "Buscar en Sucursales",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_sucursales\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar en ATMs",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_atm\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— HORARIOS —",
+            "item": [
+                {
+                    "name": "Buscar en Horarios",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_horarios\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— REQUISITOS —",
+            "item": [
+                {
+                    "name": "Buscar en Requisitos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_requisitos\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— VACANTES —",
+            "item": [
+                {
+                    "name": "Buscar en Vacantes",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"catalogo_vacantes\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— PROTECCIONES / SEGUROS —",
+            "item": [
+                {
+                    "name": "Buscar en Seguros",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"tabla_protecciones\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "— CONCEPTOS COOPERATIVOS —",
+            "item": [
+                {
+                    "name": "Buscar en Conceptos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{chatbot_api_key}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"table\": \"catalogo_conceptos_cooperativos\",\n    \"message\": \"{{search_term}}\",\n    \"limit\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8001"
+        },
+        {
+            "key": "chatbot_api_key",
+            "value": "chatbot-secret-key-2024"
+        },
+        {
+            "key": "search_term",
+            "value": "ahorro"
+        }
+    ]
+}

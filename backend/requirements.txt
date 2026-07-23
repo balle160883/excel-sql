@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pandas
+openpyxl
+python-multipart
+python-dotenv
+langchain
+langchain-openai
+pgvector
+sentence-transformers
+PyPDF2
+python-docx
+passlib[bcrypt]
+pyjwt
+cryptography

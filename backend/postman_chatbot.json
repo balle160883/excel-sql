@@ -1,0 +1,921 @@
+{
+    "info": {
+        "name": "NOVA DATA – Chatbot API (Datos Reales)",
+        "description": "Endpoints para chatbot externo. Base de datos: cooperativa/caja de ahorro.\nAutenticación: header X-API-Key.\nURL base: http://172.28.5.31:8001",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://172.28.5.31:8001"
+        },
+        {
+            "key": "api_key",
+            "value": "chatbot-secret-key-2024"
+        }
+    ],
+    "item": [
+        {
+            "name": "── UTILIDADES ──",
+            "item": [
+                {
+                    "name": "Ping (verificar conexión)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/ping",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "ping"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Listar todas las tablas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/tables",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "tables"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── PRODUCTOS DE AHORRO ──",
+            "item": [
+                {
+                    "name": "Schema de tabla_ahorro",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/tables/tabla_ahorro/schema",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "tables",
+                                "tabla_ahorro",
+                                "schema"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Todos los productos de ahorro",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_ahorro\",\n  \"columns\": [\"id\",\"nombre_producto\",\"tipo_publico\",\"monto_apertura\",\"tasa_rendimiento\",\"beneficio_principal\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar ahorro por tipo de público",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_ahorro\",\n  \"filters\": { \"tipo_publico\": \"Jóvenes\" },\n  \"columns\": [\"nombre_producto\",\"monto_apertura\",\"tasa_rendimiento\",\"beneficio_principal\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar ahorro por texto libre",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_ahorro\",\n  \"message\": \"nómina\",\n  \"limit\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resumen tabla_ahorro",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/tables/tabla_ahorro/summary",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "tables",
+                                "tabla_ahorro",
+                                "summary"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── CRÉDITOS ──",
+            "item": [
+                {
+                    "name": "Todos los créditos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tablas_credito\",\n  \"columns\": [\"id\",\"nombre_comercial\",\"categoria_bot\",\"tasa_anual\",\"plazo_max\",\"monto_max\",\"beneficio_principal\",\"status_credito\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Créditos activos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tablas_credito\",\n  \"filters\": { \"status_credito\": \"Activo\" },\n  \"columns\": [\"nombre_comercial\",\"tasa_anual\",\"cat_prom\",\"plazo_max\",\"monto_max\",\"perfil_cliente\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar crédito por texto libre",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tablas_credito\",\n  \"message\": \"hipotecario\",\n  \"limit\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── SERVICIOS ──",
+            "item": [
+                {
+                    "name": "Todos los servicios",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_servicios\",\n  \"columns\": [\"id\",\"nombre_servicio\",\"categoria_bot\",\"descripcion_corta\",\"costo_socio\",\"accion_sugerida\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar servicio por texto libre",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_servicios\",\n  \"message\": \"transferencia\",\n  \"limit\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── SOPORTE ──",
+            "item": [
+                {
+                    "name": "Todos los problemas de soporte",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"catalgo_soporte\",\n  \"columns\": [\"id\",\"problema\",\"categoria\",\"urgencia\",\"paso_1\",\"paso_2\",\"contacto\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soporte por urgencia",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"catalgo_soporte\",\n  \"filters\": { \"urgencia\": \"Alta\" },\n  \"columns\": [\"problema\",\"paso_1\",\"paso_2\",\"contacto\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar problema por texto libre",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"catalgo_soporte\",\n  \"message\": \"tarjeta bloqueada\",\n  \"limit\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── PROMOCIONES ──",
+            "item": [
+                {
+                    "name": "Promociones activas",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_promociones\",\n  \"filters\": { \"status\": \"Activa\" },\n  \"columns\": [\"nombre_campana\",\"tipo\",\"publico\",\"descripcion_hook\",\"beneficio\",\"vigencia\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Todas las promociones",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_promociones\",\n  \"columns\": [\"id\",\"nombre_campana\",\"tipo\",\"publico\",\"beneficio\",\"vigencia\",\"status\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── SUCURSALES Y ATM ──",
+            "item": [
+                {
+                    "name": "Todas las sucursales",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_sucursales\",\n  \"columns\": [\"nombre_sucursal\",\"calle\",\"colonia\",\"ciudad\",\"estado\",\"cp\",\"telefono\",\"geolocalizacion\"],\n  \"limit\": 100\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Sucursales por ciudad",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_sucursales\",\n  \"filters\": { \"ciudad\": \"GUADALAJARA\" },\n  \"columns\": [\"nombre_sucursal\",\"calle\",\"colonia\",\"telefono\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Todos los ATMs",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_atm\",\n  \"columns\": [\"id_cajero\",\"descrpcion_atm\",\"domicilio\",\"colonia\",\"ciudad\",\"estado\",\"estatus\",\"opera_las_24_hrs\",\"servicios\"],\n  \"limit\": 100\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "ATMs activos 24hrs",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_atm\",\n  \"filters\": { \"opera_las_24_hrs\": \"Sí\", \"estatus\": \"Activo\" },\n  \"columns\": [\"descrpcion_atm\",\"domicilio\",\"colonia\",\"ciudad\",\"geolocalizacion\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar ATM por ciudad (texto libre)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_atm\",\n  \"message\": \"Monterrey\",\n  \"limit\": 10\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── HORARIOS ──",
+            "item": [
+                {
+                    "name": "Todos los horarios",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_horarios\",\n  \"columns\": [\"descripcion\",\"dias_semana\",\"hora_apertura\",\"hora_cierre\",\"dias_sabado\",\"hora_apertura_sab\",\"hora_cierre_sab\",\"zona_horaria\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── REQUISITOS ──",
+            "item": [
+                {
+                    "name": "Todos los requisitos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_requisitos\",\n  \"columns\": [\"id\",\"nombre_corto\",\"instruccion_usuario\",\"documentos_validos\",\"vigencia_meses\",\"tips_error\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar requisito por tipo de documento",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_requisitos\",\n  \"message\": \"INE\",\n  \"limit\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── VACANTES ──",
+            "item": [
+                {
+                    "name": "Vacantes disponibles",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"catalogo_vacantes\",\n  \"filters\": { \"status\": \"Activa\" },\n  \"columns\": [\"puesto_titulo\",\"area\",\"ubicacion\",\"descripcion\",\"sueldo_beneficios\",\"contacto\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── PROTECCIONES / SEGUROS ──",
+            "item": [
+                {
+                    "name": "Todos los seguros",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"tabla_protecciones\",\n  \"columns\": [\"id\",\"nombre_oficial\",\"tipo_riesgo\",\"monto_cobertura\",\"condicion_activacion\",\"costo_socio\",\"beneficiarios\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "── CONCEPTOS COOPERATIVOS ──",
+            "item": [
+                {
+                    "name": "Todos los conceptos",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"catalogo_conceptos_cooperativos\",\n  \"columns\": [\"id\",\"tema_principal\",\"definicion_bot\",\"analogia_ejemplo\",\"nivel\"],\n  \"limit\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/query",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "query"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar concepto por texto libre",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "X-API-Key",
+                                "value": "{{api_key}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"table\": \"catalogo_conceptos_cooperativos\",\n  \"message\": \"aportación\",\n  \"limit\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/chatbot/search",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "chatbot",
+                                "search"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

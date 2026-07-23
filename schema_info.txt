@@ -1,0 +1,43 @@
+Sheets: ['Descripciones_tablas', 'Tabla_Ahorro', 'Tablas_Inversiones', 'Tablas_Credito', 'Tabla_Horarios', 'Tabla_requisitos', 'Tabla_Servicios', 'Catalgo_soporte', 'Tabla_Promociones', 'Catalogo_Conceptos_Cooperativos', 'Tabla_ATM', 'Tabla_Sucursales', 'Catalogo_Vacantes', 'Tabla_Protecciones']
+
+SHEET: Descripciones_tablas
+COLUMNS: ['Tabla Ahorro']
+
+SHEET: Tabla_Ahorro
+COLUMNS: ['id', 'nombre_producto', 'tipo_publico', 'monto_apertura', 'saldo_minimo', 'tasa_rendimiento', 'disponibilidad', 'medios_acceso', 'requisitos_clave', 'beneficio_principal', 'keywords_busqueda']
+
+SHEET: Tablas_Inversiones
+COLUMNS: []
+
+SHEET: Tablas_Credito
+COLUMNS: ['Catalogo_Creditos']
+
+SHEET: Tabla_Horarios
+COLUMNS: ['id_horario', 'descripcion', 'dias_semana', 'hora_apertura', 'hora_cierre', 'dias_sabado', 'hora_apertura_sab', 'hora_cierre_sab', 'zona_horaria', 'aplica_a (Ejemplos)']
+
+SHEET: Tabla_requisitos
+COLUMNS: ['Tablas de requisitos']
+
+SHEET: Tabla_Servicios
+COLUMNS: ['Servicios_Beneficios_Caja Oblatos']
+
+SHEET: Catalgo_soporte
+COLUMNS: ['id', 'problema', 'categoria', 'urgencia', 'paso_1', 'paso_2', 'docs_req', 'tiempo', 'contacto', 'keywords']
+
+SHEET: Tabla_Promociones
+COLUMNS: ['id', 'nombre_campana', 'tipo', 'publico', 'descripcion_hook', 'condicion', 'beneficio', 'vigencia', 'status']
+
+SHEET: Catalogo_Conceptos_Cooperativos
+COLUMNS: ['id', 'tema_principal', 'definicion_bot', 'analogia_ejemplo', 'preguntas_usuario', 'nivel']
+
+SHEET: Tabla_ATM
+COLUMNS: ['ID_Cajero', 'Descrpcion_ATM ', 'Tipo', 'Domicilio', 'no_exterior', 'Colonia', 'Estado', 'Municipio', '*Ciudad', 'C.P.', 'Geolocalizacion', 'Tiene sucursal asignada', 'Sucursal', 'Estatus', 'Opera las 24 Hrs.', '*Monto mínimo operación', '*Costo consulta saldo', '*Costo retiro nacional', 'Incluir retiro internacional', '*Costo retiro internacional', 'Servicios', 'Idioma', 'accesibilidad', 'Locacion (espacio geografico)', 'Abierto al publico']
+
+SHEET: Tabla_Sucursales
+COLUMNS: ['id', 'nombre_sucursal', 'Calle', 'Colonia', 'Ciudad', 'CP', 'telefono', 'geolocalizacion', 'Estado', 'ID_Cajero', 'id_horario']
+
+SHEET: Catalogo_Vacantes
+COLUMNS: ['id', 'puesto_titulo', 'area', 'ubicacion', 'descripcion', 'requisitos', 'sueldo_beneficios', 'contacto', 'status', 'keywords']
+
+SHEET: Tabla_Protecciones
+COLUMNS: ['Tabla Protecciones']

@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  sas_db:
+    image: postgres:15-alpine
+    container_name: sas_porter_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-sas_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - sas_postgres_data:/var/lib/postgresql/data
+    networks:
+      - sas_network
+
+  sas_backend:
+    build: ./backend
+    container_name: sas_porter_backend
+    restart: always
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@sas_db:5432/${POSTGRES_DB:-sas_db}
+    depends_on:
+      - sas_db
+    networks:
+      - sas_network
+
+  sas_frontend:
+    build: ./frontend
+    container_name: sas_porter_frontend
+    restart: always
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3010:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
+    depends_on:
+      - sas_backend
+    networks:
+      - sas_network
+
+  sas_tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: sas_porter_tunnel
+    restart: always
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiYjE0Y2QwZTMxNGUxNDQxYTE0Yjc0NTQ5ZTdlN2I2ZWEiLCJ0IjoiNjYxOWU2NmUtNzBhOC00NGZlLTgyNDctYzEyMmRkNTY0YmUzIiwicyI6Ik9HSm1OREptTldRdE16VXpNeTAwTnpWa0xXRTFNMlV0TUdGaVl6SmhPV0k1WTJabSJ9
+    command: tunnel run
+    depends_on:
+      - sas_backend
+      - sas_frontend
+    networks:
+      - sas_network
+
+networks:
+  sas_network:
+    driver: bridge
+
+volumes:
+  sas_postgres_data:
