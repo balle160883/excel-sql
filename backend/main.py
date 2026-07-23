@@ -38,35 +38,43 @@ processor = FileProcessor()
 @app.on_event("startup")
 def restore_backup_and_create_initial_admin():
     backup_path = "/app/sas_db_backup.sql"
+    print(f"=== INICIANDO VERIFICACION DE BACKUP ({backup_path}) ===")
     if os.path.exists(backup_path):
         try:
             with open(backup_path, "r", encoding="utf-8") as f:
                 sql_content = f.read()
 
-            # Limpiar lineas psql (\restrict, \connect, etc) y comentarios
-            clean_lines = []
+            print(f"Leidos {len(sql_content)} caracteres del archivo SQL.")
+
+            # Filtrar lineas incompatibles de pg_dump (\restrict, \connect, SET, etc)
+            clean_statements = []
+            current_stmt = []
+            
             for line in sql_content.splitlines():
                 stripped = line.strip()
-                if stripped.startswith("\\") or stripped.startswith("--"):
+                if not stripped or stripped.startswith("\\") or stripped.startswith("--") or stripped.startswith("SET ") or stripped.startswith("SELECT pg_catalog"):
                     continue
-                clean_lines.append(line)
-            
-            clean_sql = "\n".join(clean_lines)
+                current_stmt.append(line)
+                if stripped.endswith(";"):
+                    clean_statements.append("\n".join(current_stmt))
+                    current_stmt = []
 
-            # Ejecutar bloque a bloque separado por ';'
-            raw_statements = clean_sql.split(";")
+            print(f"Total de sentencias limpias a ejecutar: {len(clean_statements)}")
             
+            executed_count = 0
             with engine.begin() as conn:
-                for stmt in raw_statements:
-                    s = stmt.strip()
-                    if s:
-                        try:
-                            conn.execute(text(s))
-                        except Exception:
-                            pass
-            print("Restauracion SQL por bloques finalizada.")
+                for stmt in clean_statements:
+                    try:
+                        conn.execute(text(stmt))
+                        executed_count += 1
+                    except Exception as e:
+                        print(f"Warn en SQL: {str(e)[:80]}")
+
+            print(f"=== RESTAURACION COMPLETADA: {executed_count} SENTENCIAS EJECUTADAS CON EXITO ===")
         except Exception as ex:
             print(f"Error restaurando backup: {ex}")
+    else:
+        print("No se encontro el archivo /app/sas_db_backup.sql")
 
     with engine.begin() as conn:
         result = conn.execute(text("SELECT id FROM users WHERE username = 'admin'")).fetchone()
