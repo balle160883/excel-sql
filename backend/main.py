@@ -12,6 +12,7 @@ from services.audit_service import log_action
 from sqlalchemy.orm import Session
 import uvicorn
 import os
+import re
 from typing import List, Dict, Any
 
 # Crear tablas del sistema
@@ -40,32 +41,30 @@ def restore_backup_and_create_initial_admin():
     if os.path.exists(backup_path):
         try:
             with open(backup_path, "r", encoding="utf-8") as f:
-                content = f.read()
+                sql_content = f.read()
+
+            # Limpiar lineas psql (\restrict, \connect, etc) y comentarios
+            clean_lines = []
+            for line in sql_content.splitlines():
+                stripped = line.strip()
+                if stripped.startswith("\\") or stripped.startswith("--"):
+                    continue
+                clean_lines.append(line)
             
-            # Extraer todas las sentencias CREATE TABLE
-            create_tables = [s.strip() for s in content.split("CREATE TABLE ") if s.strip()]
+            clean_sql = "\n".join(clean_lines)
+
+            # Ejecutar bloque a bloque separado por ';'
+            raw_statements = clean_sql.split(";")
             
             with engine.begin() as conn:
-                for ct in create_tables[1:]:
-                    stmt_body = ct.split(";\n")[0]
-                    full_stmt = "CREATE TABLE " + stmt_body
-                    try:
-                        conn.execute(text(full_stmt))
-                    except Exception as e:
-                        pass
-
-            # Extraer sentencias INSERT INTO
-            inserts = [s.strip() for s in content.split("INSERT INTO ") if s.strip()]
-            with engine.begin() as conn:
-                for ins in inserts[1:]:
-                    stmt_body = ins.split(";\n")[0]
-                    full_stmt = "INSERT INTO " + stmt_body
-                    try:
-                        conn.execute(text(full_stmt))
-                    except Exception as e:
-                        pass
-
-            print("Restauracion directa de tablas completada.")
+                for stmt in raw_statements:
+                    s = stmt.strip()
+                    if s:
+                        try:
+                            conn.execute(text(s))
+                        except Exception:
+                            pass
+            print("Restauracion SQL por bloques finalizada.")
         except Exception as ex:
             print(f"Error restaurando backup: {ex}")
 
@@ -351,7 +350,7 @@ async def delete_row(
                 user_id=current_user.id,
                 action="DELETE",
                 table_name=table_name,
-                record_id=str(pk_value),
+                record_id="DELETED",
                 details={"info": "Registro eliminado"}
             )
 
