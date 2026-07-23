@@ -54,14 +54,18 @@ def run_sql_restore():
                 clean_statements.append("\n".join(current_stmt))
                 current_stmt = []
 
+        print(f"Total sentencias a ejecutar: {len(clean_statements)}")
         with engine.begin() as conn:
+            success_count = 0
             for stmt in clean_statements:
                 try:
                     conn.execute(text(stmt))
-                except Exception:
-                    pass
-    except Exception:
-        pass
+                    success_count += 1
+                except Exception as e:
+                    print(f"Error ejecutando SQL ({stmt[:40]}...): {e}")
+            print(f"Ejecutadas con éxito {success_count} / {len(clean_statements)} sentencias.")
+    except Exception as ex:
+        print(f"Error general en restore: {ex}")
 
 @app.on_event("startup")
 def create_initial_admin():
